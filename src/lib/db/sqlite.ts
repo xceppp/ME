@@ -1164,7 +1164,13 @@ function mapReminder(row: Row): ReminderRecord {
   };
 }
 
-const defaultPath = path.join(process.cwd(), "data", "peace.db");
+function defaultDatabasePath(): string {
+  // Vercel serverless disks are read-only outside /tmp.
+  if (process.env.VERCEL) return path.join("/tmp", "peace-mode", "peace.db");
+  return path.join(process.cwd(), "data", "peace.db");
+}
+
+const defaultPath = defaultDatabasePath();
 let singleton: SqliteStore | null = null;
 
 export function openStore(file = defaultPath): SqliteStore {

@@ -22,8 +22,24 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
+export const runtime = "nodejs";
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const viewer = await getViewer();
+  let viewer: Awaited<ReturnType<typeof getViewer>> = null;
+  try {
+    viewer = await getViewer();
+  } catch (error) {
+    console.error("[peace-mode] startup");
+    const message = error instanceof Error ? error.message : "The app could not open its database.";
+    return (
+      <html lang="en">
+        <body style={{ background: "#0B0F14", color: "#F3F5F7", fontFamily: "sans-serif", padding: "2rem" }}>
+          <h1>PEACE MODE could not start</h1>
+          <p>{message}</p>
+        </body>
+      </html>
+    );
+  }
   const theme = viewer?.profile.preferences.theme ?? "dark";
   const reduced = viewer?.profile.preferences.reducedMotion ? "reduce" : "ok";
   return (
