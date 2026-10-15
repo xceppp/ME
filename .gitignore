@@ -1,0 +1,13 @@
+node_modules
+.next
+dist
+coverage
+data
+.env
+.env.local
+*.db
+*.db-journal
+playwright-report
+test-results
+tsconfig.tsbuildinfo
+.auth-secret
