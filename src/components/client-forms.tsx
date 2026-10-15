@@ -435,7 +435,7 @@ export function JournalEditor({ date, categories, entry }: { date: string; categ
   );
 }
 
-export function SettingsPanels({ profile, reminders }: { profile: { displayName: string; email: string; timezone: string; preferences: { theme: string; reducedMotion: boolean; streakThreshold: number; startOfWeek: number; motivationalEnabled: boolean; dashboardMission: string; quietHoursStart: string; quietHoursEnd: string } }; reminders: { morning: { enabled: boolean; time: string }; evening: { enabled: boolean; time: string } } }) {
+export function SettingsPanels({ profile, reminders, singleUser = false }: { profile: { displayName: string; email: string; timezone: string; preferences: { theme: string; reducedMotion: boolean; streakThreshold: number; startOfWeek: number; motivationalEnabled: boolean; dashboardMission: string; quietHoursStart: string; quietHoursEnd: string } }; reminders: { morning: { enabled: boolean; time: string }; evening: { enabled: boolean; time: string } }; singleUser?: boolean }) {
   const router = useRouter();
   const [message, setMessage] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -447,7 +447,7 @@ export function SettingsPanels({ profile, reminders }: { profile: { displayName:
       }}>
         <h2 className="text-xl">Profile</h2>
         <label className="text-sm">Display name<input className="field" name="displayName" defaultValue={profile.displayName} /></label>
-        <p className="text-sm text-muted">Email: {profile.email}</p>
+        {singleUser ? null : <p className="text-sm text-muted">Email: {profile.email}</p>}
         <label className="text-sm">Timezone<input className="field" name="timezone" defaultValue={profile.timezone} /></label>
         <p className="text-sm text-muted">Changing timezone does not rewrite historical local dates. New days use the new zone.</p>
         <button className="btn btn-primary">Save profile</button>
@@ -492,7 +492,7 @@ export function SettingsPanels({ profile, reminders }: { profile: { displayName:
         <input className="field" type="time" name="eveningTime" defaultValue={reminders.evening.time} aria-label="Evening time" />
         <button className="btn btn-primary">Save reminders</button>
       </form>
-      <form className="card space-y-3 p-4" action={async (formData) => {
+      {singleUser ? null : <form className="card space-y-3 p-4" action={async (formData) => {
         const result = await changePassword(String(formData.get("current") ?? ""), String(formData.get("next") ?? ""));
         setMessage(result.ok ? "Password updated." : result.error);
       }}>
@@ -500,11 +500,11 @@ export function SettingsPanels({ profile, reminders }: { profile: { displayName:
         <input className="field" type="password" name="current" aria-label="Current password" />
         <input className="field" type="password" name="next" aria-label="New password" minLength={8} />
         <button className="btn btn-primary">Change password</button>
-      </form>
+      </form>}
       <section className="card space-y-3 p-4">
         <h2 className="text-xl">Privacy</h2>
         <a className="btn btn-ghost" href="/api/export">Export my data</a>
-        <form className="space-y-2" action={async (formData) => {
+        {singleUser ? null : <form className="space-y-2" action={async (formData) => {
           const response = await fetch("/api/account/delete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: formData.get("password"), confirmation: formData.get("confirmation") }) });
           const body = await response.json() as { ok: boolean; error?: string };
           if (!body.ok) setDeleteError(body.error ?? "Deletion failed.");
@@ -515,7 +515,7 @@ export function SettingsPanels({ profile, reminders }: { profile: { displayName:
           <input className="field" name="confirmation" aria-label="Type DELETE" />
           <button className="btn btn-danger">Delete account</button>
           <Notice message={deleteError} />
-        </form>
+        </form>}
       </section>
       <CategoryManager />
       <Notice message={message} />

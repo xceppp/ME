@@ -1,17 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { SESSION_COOKIE, verifySession } from "@/lib/auth/session-cookie";
 import { dataMode } from "@/lib/config";
-
-const PUBLIC_PATHS = new Set(["/", "/login", "/signup", "/forgot-password", "/reset-password", "/verify-email"]);
-
-function isPublic(pathname: string): boolean {
-  if (PUBLIC_PATHS.has(pathname)) return true;
-  if (pathname.startsWith("/api/auth")) return true;
-  if (pathname.startsWith("/_next")) return true;
-  if (pathname === "/manifest.webmanifest" || pathname === "/sw.js" || pathname === "/icon.svg" || pathname === "/favicon.ico") return true;
-  if (pathname.startsWith("/icons/")) return true;
-  return false;
-}
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -20,20 +8,10 @@ export async function middleware(request: NextRequest) {
     return updateSupabaseSession(request);
   }
 
-  const token = request.cookies.get(SESSION_COOKIE)?.value;
-  const secret = process.env.AUTH_SECRET;
-  const session = token && secret ? await verifySession(token, secret) : null;
-
-  if (!session && !isPublic(pathname)) {
+  if (pathname === "/login" || pathname === "/signup" || pathname === "/forgot-password" || pathname === "/reset-password" || pathname === "/verify-email") {
     const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    url.searchParams.set("next", pathname);
-    return NextResponse.redirect(url);
-  }
-
-  if (session && (pathname === "/login" || pathname === "/signup")) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/";
+    url.pathname = "/home";
+    url.search = "";
     return NextResponse.redirect(url);
   }
 

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { signOut } from "@/app/actions";
 import { PageTitle } from "@/components/shell";
 
 const links = [
@@ -17,7 +16,6 @@ export default function MorePage() {
       <div className="grid gap-2">
         {links.map(([href, label]) => <Link key={href} className="card min-h-14 px-4 py-4" href={href!}>{label}</Link>)}
       </div>
-      <form className="mt-6" action={signOut}><button className="btn btn-ghost">Sign out</button></form>
     </>
   );
 }
